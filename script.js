@@ -1,4 +1,11 @@
-        // Initialize Firebase
+       // Check if 'uName' and 'uPhone' are present in localStorage
+if (!localStorage.getItem('uName') || !localStorage.getItem('uPhone')) {
+    // Redirect to signup.html if either value is missing
+    window.location.href = 'signup.html';
+}
+
+
+// Initialize Firebase
         const firebaseConfig = {
             apiKey: "API_KEY",
             authDomain: "uncraved-db.firebaseapp.com",

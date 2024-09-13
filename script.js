@@ -130,7 +130,7 @@
         
         
         // Redirect to confirm.html
-        // window.location.href = 'confirm.html';
+        window.location.href = 'confirm.html';
         });
         });
         });

@@ -229,7 +229,7 @@ window.addEventListener('scroll', function () {
 applyScrollBlurEffect();
 
         // Fetch user's name from local storage
-        const userName = localStorage.getItem('name') || 'User'; // Default to 'User' if name is not found
+        const userName = localStorage.getItem('uName') || 'User'; // Default to 'User' if name is not found
 
         // Update the intro paragraph with the user's name
         const introText = document.getElementById('intro-text');

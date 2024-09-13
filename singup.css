@@ -1,4 +1,10 @@
-        /* CSS only for signup page */
+* {
+
+    -webkit-tap-highlight-color: transparent;
+    
+    }
+
+/* CSS only for signup page */
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;

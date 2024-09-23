@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            padding: 30px;
+            width: 75%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="url"],
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="url"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #3709ff;
+            outline: none;
+        }
+
+        textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        button {
+            background-color: #3709ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2a07c4;
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img style="height: 40px; width: auto; margin-bottom: 20px;" src="https://raw.githubusercontent.com/NxtCounsil/UnCraved.in/main/20240829_205223.jpg" alt="UnCraved Admin">
+        <form id="mealForm">
+            <input type="url" id="imageUrl" name="imageUrl" required placeholder="Enter image URL">
+
+            <input type="text" id="mealName" name="mealName" required placeholder="Enter meal name" maxlength="16">
+
+            <input type="number" id="mealPrice" name="mealPrice" required placeholder="Enter meal price" min="1" max="999">
+
+            <textarea id="mealDescription" name="mealDescription" required placeholder="Enter meal description" maxlength="120"></textarea>
+
+            <select id="mealType" name="mealType" required>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+            </select>
+
+            <button type="submit">Upload Meal</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9QKcOJSUC3qZvn_czGZ13yCJFCtSHZHg",
+            authDomain: "uncraved-db.firebaseapp.com",
+            databaseURL: "https://uncraved-db-default-rtdb.firebaseio.com",
+            projectId: "uncraved-db",
+            storageBucket: "uncraved-db.appspot.com",
+            messagingSenderId: "174605544518",
+            appId: "1:174605544518:web:7077ea6ae13a66b6d0ae47",
+            measurementId: "G-L5VRHNSYY0"
+        };
+    
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    
+        console.log('Firebase initialized successfully');
+
+        // Auto select meal type based on current hour
+        const currentHour = new Date().getHours();
+        const mealTypeSelect = document.getElementById('mealType');
+
+        if (currentHour >= 10 && currentHour < 15) {
+            mealTypeSelect.value = 'lunch';
+        } else if (currentHour >= 15 && currentHour < 22) {
+            mealTypeSelect.value = 'dinner';
+        } else {
+            mealTypeSelect.value = 'breakfast';
+        }
+    
+        // Event listener for form submission
+        document.getElementById('mealForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent form from submitting normally
+    
+            // Get form values
+            const imageUrl = document.getElementById('imageUrl').value;
+            const mealName = document.getElementById('mealName').value;
+            const mealPrice = document.getElementById('mealPrice').value;
+            const mealDescription = document.getElementById('mealDescription').value; // Get the description
+            const mealTypeRaw = document.getElementById('mealType').value;
+    
+            // Convert mealType to single character (B, L, D)
+            const mealType = mealTypeRaw === 'breakfast' ? 'B' : mealTypeRaw === 'lunch' ? 'L' : 'D';
+    
+            // Get the current date and format it as ddmmyyyy
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JS
+            const year = today.getFullYear();
+            const formattedDate = `${day}${month}${year}`; // Format as ddmmyyyy
+    
+            // Get kitchenName, location, and phone from localStorage
+            const kitchenName = localStorage.getItem('kitchenName') || 'Unknown Kitchen'; // Default to 'Unknown Kitchen' if not set
+            const location = localStorage.getItem('Location') || 'Unknown Location'; // Default to 'Unknown Location'
+            const phone = localStorage.getItem('Phone') || 'Unknown Phone'; // Default to 'Unknown Phone'
+    
+            console.log(`Data to upload: ${imageUrl}, ${mealName}, ${mealPrice}, ${mealDescription}, ${mealType}, ${formattedDate}, ${kitchenName}, ${location}, ${phone}`);
+    
+            // Push data to Firebase database under 'food-items'
+            database.ref('food-items').push({
+                imageUrl: imageUrl,
+                type: mealType,
+                name: mealName,
+                price: mealPrice,
+                description: mealDescription, // Include the description
+                date: formattedDate, // Add the date in ddmmyyyy format
+                kitchen: kitchenName, // Add the kitchenName from localStorage
+                location: location, // Add the location from localStorage
+                WhatsApp: phone, // Add the phone from localStorage under WhatsApp tag
+                status: '1' // Add status as '1'
+            }).then(() => {
+                alert('Meal uploaded successfully!');
+                document.getElementById('mealForm').reset(); // Reset the form
+            }).catch((error) => {
+                console.error('Error uploading meal:', error);
+            });
+        });
+    </script>
+</body>
+</html>

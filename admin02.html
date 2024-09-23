@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            padding: 30px;
+            width: 75%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="phone"],
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="phone"]:focus,
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #3709ff;
+            outline: none;
+        }
+
+        button {
+            background-color: #3709ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2a07c4;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: -20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img style="height: 40px; width: auto; margin-bottom: 20px;" src="https://raw.githubusercontent.com/NxtCounsil/UnCraved.in/main/20240829_205223.jpg" alt="UnCraved Admin">
+        <form id="mealForm">
+            <input type="text" id="kitchenName" name="kitchenName" required placeholder="Enter kitchen name" maxlength="16">
+            <input type="text" id="Location" name="Location" required placeholder="Enter Kitchen Location (Google Map URL)">
+            <input type="phone" id="Phone" name="Phone" required placeholder="Enter Phone Number">
+            <input type="password" id="Password" name="Password" required placeholder="Enter Admin Password">
+            <button type="submit">Login</button>
+            <p class="error" id="error-message">text to +91 8237913246 for admin password.</p>
+        </form>
+    </div>
+
+    <script>
+        // Predefined admin password
+        const adminPassword = "uncraved001@mitadt";
+
+        // Check if data already exists in local storage
+        window.onload = function() {
+            if (localStorage.getItem("kitchenName") && localStorage.getItem("Location") && localStorage.getItem("Phone")) {
+                window.location.href = "admin01.html";
+            }
+        };
+
+        // Handle form submission
+        document.getElementById("mealForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form submission
+            
+            // Get form values
+            const kitchenName = document.getElementById("kitchenName").value;
+            const location = document.getElementById("Location").value;
+            const phone = document.getElementById("Phone").value;
+            const password = document.getElementById("Password").value;
+
+            // Check if password is correct
+            if (password === adminPassword) {
+                // Save data to local storage
+                localStorage.setItem("kitchenName", kitchenName);
+                localStorage.setItem("Location", location);
+                localStorage.setItem("Phone", phone);
+
+                // Redirect to admin page
+                window.location.href = "admin01.html";
+            } else {
+                // Show error message
+                document.getElementById("error-message").style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -255,8 +255,9 @@
     let whatsappNumber = localStorage.getItem('whatsapp'); // Get WhatsApp number from local storage
     const foodType = localStorage.getItem('type') || 'B'; // Default to breakfast if no type
     const foodName = localStorage.getItem('food_name') || 'Default Food'; // Get food name
-    const userName = localStorage.getItem('name') || 'Customer'; // Get user name from local storage
-    const userPhone = localStorage.getItem('phone') || '0000000000'; // Get user's phone number
+    const userName = localStorage.getItem('uName') || 'Customer'; // Get user name from local storage
+    const userPhone = localStorage.getItem('uPhone') || '0000000000'; // Get user's phone number
+
 
     // Check if the WhatsApp number has '+91'. If not, add it.
     if (!whatsappNumber.startsWith('+91')) {

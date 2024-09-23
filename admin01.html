@@ -190,7 +190,6 @@
                 WhatsApp: phone, // Add the phone from localStorage under WhatsApp tag
                 status: '1' // Add status as '1'
             }).then(() => {
-                alert('Meal uploaded successfully!');
                 document.getElementById('mealForm').reset(); // Reset the form
             }).catch((error) => {
                 console.error('Error uploading meal:', error);

@@ -122,6 +122,7 @@ if (!localStorage.getItem('uName') || !localStorage.getItem('uPhone')) {
         localStorage.setItem('description', selectedFoodItem.description || '');
         localStorage.setItem('location', selectedFoodItem.location || '');
         localStorage.setItem('whatsapp', selectedFoodItem.WhatsApp || '');
+        localStorage.setItem('type', selectedFoodItem.type || '');
 
                             // Log to check if the data is being stored in localStorage
                             console.log("Stored in localStorage individually:", {
@@ -132,6 +133,7 @@ if (!localStorage.getItem('uName') || !localStorage.getItem('uPhone')) {
                             description: localStorage.getItem('description'),
                             location: localStorage.getItem('location'),
                             whatsapp: localStorage.getItem('whatsapp'),
+                            type: localStorage.getItem('type'),
                             status: localStorage.getItem('status')
                         });
         

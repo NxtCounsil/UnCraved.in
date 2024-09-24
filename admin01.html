@@ -244,6 +244,14 @@
                 return;
             }
 
+            // Get the current date and format it as ddmmyyyy
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JS
+            const year = today.getFullYear();
+            const formattedDate = `${day}${month}${year}`; // Format as ddmmyyyy
+
+
             const kitchenName = localStorage.getItem('kitchenName');
             const location = localStorage.getItem('Location');
             const phone = localStorage.getItem('Phone');
@@ -259,7 +267,8 @@
                 description: mealDescription, // Add description
                 kitchen: kitchenName,
                 location: location, // Add the location
-                phone: phone // Add the phone number
+                phone: phone, // Add the phone number
+                date: formattedDate
             }).then(function() {
                 // Mark this meal type as submitted for today
                 markAsSubmitted(mealTypeRaw);

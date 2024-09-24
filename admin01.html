@@ -78,6 +78,49 @@
             background-color: #2a07c4;
         }
 
+        .popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            font-size: 16px;
+        }
+
+        .popup.error {
+            background-color: #dc3545;
+        }
+
+        .popup.show {
+            display: block;
+            animation: fadeInOut 5s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
         @media (max-width: 400px) {
             .card {
                 width: 90%;
@@ -106,14 +149,17 @@
             <button type="submit">Upload Meal</button>
         </form>
     </div>
-    
+
+    <!-- Popup Message -->
+    <div id="popupMessage" class="popup"></div>
+
     <script>
         if (!localStorage.getItem('kitchenName') || !localStorage.getItem('Location')) {
-    // Redirect to signup.html if either value is missing
-    window.location.href = 'admin02.html';
-    }
+            // Redirect to signup.html if either value is missing
+            window.location.href = 'admin02.html';
+        }
     </script>
-    
+
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
@@ -130,11 +176,11 @@
             appId: "1:174605544518:web:7077ea6ae13a66b6d0ae47",
             measurementId: "G-L5VRHNSYY0"
         };
-    
+
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-    
+
         console.log('Firebase initialized successfully');
 
         // Auto select meal type based on current hour
@@ -148,51 +194,80 @@
         } else {
             mealTypeSelect.value = 'breakfast';
         }
-    
+
+        // Function to check if the user has already submitted a meal for the current day and meal type
+        function hasSubmittedToday(mealType) {
+            const today = new Date().toISOString().slice(0, 10); // Get the current date in 'YYYY-MM-DD' format
+            const submissionKey = `${mealType}_${today}`; // Create a unique key for the mealType and date
+            return localStorage.getItem(submissionKey) !== null;
+        }
+
+        // Function to mark a meal as submitted for today
+        function markAsSubmitted(mealType) {
+            const today = new Date().toISOString().slice(0, 10); // Get the current date in 'YYYY-MM-DD' format
+            const submissionKey = `${mealType}_${today}`; // Create a unique key for the mealType and date
+            localStorage.setItem(submissionKey, 'submitted');
+        }
+
+        // Function to show a popup message
+        function showPopup(message, type = 'success') {
+            const popup = document.getElementById('popupMessage');
+            popup.textContent = message;
+            popup.className = `popup ${type}`;
+            popup.classList.add('show');
+
+            // Automatically hide the popup after 5 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 5000);
+        }
+
         // Event listener for form submission
         document.getElementById('mealForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent form from submitting normally
-    
+
             // Get form values
             const imageUrl = document.getElementById('imageUrl').value;
             const mealName = document.getElementById('mealName').value;
             const mealPrice = document.getElementById('mealPrice').value;
             const mealDescription = document.getElementById('mealDescription').value; // Get the description
             const mealTypeRaw = document.getElementById('mealType').value;
-    
+
             // Convert mealType to single character (B, L, D)
             const mealType = mealTypeRaw === 'breakfast' ? 'B' : mealTypeRaw === 'lunch' ? 'L' : 'D';
-    
-            // Get the current date and format it as ddmmyyyy
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JS
-            const year = today.getFullYear();
-            const formattedDate = `${day}${month}${year}`; // Format as ddmmyyyy
-    
-            // Get kitchenName, location, and phone from localStorage
-            const kitchenName = localStorage.getItem('kitchenName') || 'Unknown Kitchen'; // Default to 'Unknown Kitchen' if not set
-            const location = localStorage.getItem('Location') || 'Unknown Location'; // Default to 'Unknown Location'
-            const phone = localStorage.getItem('Phone') || 'Unknown Phone'; // Default to 'Unknown Phone'
-    
-            console.log(`Data to upload: ${imageUrl}, ${mealName}, ${mealPrice}, ${mealDescription}, ${mealType}, ${formattedDate}, ${kitchenName}, ${location}, ${phone}`);
-    
-            // Push data to Firebase database under 'food-items'
-            database.ref('food-items').push({
+
+            // Check if the user has already submitted for this meal type today
+            if (hasSubmittedToday(mealTypeRaw)) {
+                showPopup(`You have already submitted a meal for ${mealTypeRaw} today. Please try again tomorrow.`, 'error');
+                return;
+            }
+
+            const kitchenName = localStorage.getItem('kitchenName');
+            const location = localStorage.getItem('Location');
+            const phone = localStorage.getItem('Phone');
+
+            // Firebase database reference
+            const mealRef = firebase.database().ref('food-items').push();
+
+            mealRef.set({
                 imageUrl: imageUrl,
                 type: mealType,
                 name: mealName,
                 price: mealPrice,
-                description: mealDescription, // Include the description
-                date: formattedDate, // Add the date in ddmmyyyy format
-                kitchen: kitchenName, // Add the kitchenName from localStorage
-                location: location, // Add the location from localStorage
-                WhatsApp: phone, // Add the phone from localStorage under WhatsApp tag
-                status: '1' // Add status as '1'
-            }).then(() => {
-                document.getElementById('mealForm').reset(); // Reset the form
-            }).catch((error) => {
-                console.error('Error uploading meal:', error);
+                description: mealDescription, // Add description
+                kitchen: kitchenName,
+                location: location, // Add the location
+                phone: phone // Add the phone number
+            }).then(function() {
+                // Mark this meal type as submitted for today
+                markAsSubmitted(mealTypeRaw);
+
+                showPopup('Meal uploaded successfully!', 'success');
+
+                // Clear form fields after successful submission
+                document.getElementById('mealForm').reset();
+            }).catch(function(error) {
+                showPopup('Error uploading meal: ' + error.message, 'error');
             });
         });
     </script>
